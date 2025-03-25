@@ -11,6 +11,11 @@ https://docs.djangoproject.com/en/5.1/ref/settings/
 """
 
 from pathlib import Path
+import environ
+
+# Initialize environment variables
+env = environ.Env()
+environ.Env.read_env()  # This loads the .env file
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -81,14 +86,25 @@ WSGI_APPLICATION = 'backend.wsgi.application'
 
 import os
 import dj_database_url
+from dotenv import load_dotenv
+
+# Load environment variables from the .env file
+load_dotenv()
 
 SECRET_KEY = os.getenv("DJANGO_SECRET_KEY", "default-secret-key")
 DEBUG = os.getenv("DJANGO_DEBUG", "True") == "True"
 ALLOWED_HOSTS = os.getenv("DJANGO_ALLOWED_HOSTS", "*").split(",")
 
+# Handle database URL configuration
+DATABASE_URL = os.getenv('DATABASE_URL')
+
+if not DATABASE_URL:
+    raise ValueError("DATABASE_URL is not set in environment variables")
+
 DATABASES = {
-    'default': dj_database_url.config(conn_max_age=600, ssl_require=True)
+    'default': dj_database_url.config(default=DATABASE_URL, conn_max_age=600)
 }
+
 
 # Password validation
 # https://docs.djangoproject.com/en/5.1/ref/settings/#auth-password-validators
